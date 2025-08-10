@@ -6,7 +6,9 @@ const app = express();
 const port = process.env.PORT || 9000
 
 const { PrismaClient } = require('./generated/prisma');
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query'] : [],
+});
 
 // Middleware để parse JSON
 app.use(express.json());
@@ -131,14 +133,21 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Không tìm thấy endpoint này' });
 });
 
-// khoi dong web server
-app.listen(port, () => {
-    console.log(`server dang chay tren cong ${port}`);
-    console.log(`API endpoints:`);
-    console.log(`  GET    /api/todos     - Lấy danh sách todos`);
-    console.log(`  GET    /api/todos/:id - Lấy todo theo id`);
-    console.log(`  POST   /api/todo      - Tạo todo mới`);
-    console.log(`  PUT    /api/todos/:id - Cập nhật todo`);
-    console.log(`  DELETE /api/todos/:id - Xóa todo`);
-});
+// khoi dong web server - chỉ khi chạy local (không phải trên Vercel)
+if (!process.env.VERCEL) {
+    app.listen(port, () => {
+        console.log(`server dang chay tren cong ${port}`);
+        console.log(`API endpoints:`);
+        console.log(`  GET    /api/todos     - Lấy danh sách todos`);
+        console.log(`  GET    /api/todos/:id - Lấy todo theo id`);
+        console.log(`  POST   /api/todo      - Tạo todo mới`);
+        console.log(`  PUT    /api/todos/:id - Cập nhật todo`);
+        console.log(`  DELETE /api/todos/:id - Xóa todo`);
+    });
+}
+
+
+
+// Export app cho Vercel
+module.exports = app;
 
